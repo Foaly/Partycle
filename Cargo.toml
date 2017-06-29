@@ -1,0 +1,8 @@
+[package]
+name = "particle"
+version = "0.1.0"
+authors = ["Maximilian Wagenbach <maximilian.wagenbach@native-instruments.de>"]
+
+[dependencies]
+sfml = { path = "/Users/maximilian.wagenbach/Repos/rust-sfml" }
+specs = "0.9.1"
