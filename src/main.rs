@@ -4,9 +4,16 @@ extern crate specs;
 use sfml::graphics::{Color, PrimitiveType, RenderTarget, RenderWindow, Vertex, Drawable, RenderStates};
 use sfml::window::{Event, style, Key};
 
+use specs::{Component, DispatcherBuilder, Join, ReadStorage, System, VecStorage, World,
+            WriteStorage};
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
+
+#[derive(Debug)]
 struct Particle {
-    vertices : [Vertex; 6]
+    pub vertices : [Vertex; 6]
 }
 
 impl Drawable for Particle {
@@ -37,6 +44,26 @@ impl Particle {
     }
 }
 
+impl Component for Particle {
+    type Storage = VecStorage<Self>;
+}
+
+
+
+struct RendererSystem<'a> {
+    render_target: Rc<RefCell<&'a mut RenderWindow>>,
+}
+
+impl<'a, 'b> System<'a> for RendererSystem<'b> {
+    type SystemData = ((), ReadStorage<'a, Particle>);
+
+    fn run(&mut self, (_, particles): Self::SystemData) {
+        for particle in (&particles).join() {
+            self.render_target.borrow_mut().draw(particle)
+        }
+    }
+}
+
 
 fn main() {
     let videoMode = sfml::window::VideoMode::new(800, 600, 32);
@@ -46,10 +73,21 @@ fn main() {
                                        &Default::default());
     window.set_vertical_sync_enabled(true);
 
-    let particle = Particle::new();
+    let wrapper = Rc::new(RefCell::new(&mut window));
+    let renderer = RendererSystem {render_target: wrapper.clone()};
+
+    let mut world = World::new();
+    world.register::<Particle>();
+
+
+    world.create_entity().with(Particle::new()).build();
+
+    let mut dispatcher = DispatcherBuilder::new()
+        .add_thread_local(renderer)
+        .build();
 
     loop {
-        for e in window.events() {
+        for e in wrapper.borrow().events() {
             match e {
                 Event::Closed => return,
                 Event::KeyReleased { code: keycode, .. } => match keycode {
@@ -59,11 +97,15 @@ fn main() {
                 _ => ()
             }
         }
-        // Clear the window
-        window.clear(&Color::black());
-        window.draw(&particle);
-        // Display things on screen
-        window.display()
 
+
+        // Clear the window
+        wrapper.borrow_mut().clear(&Color::black());
+
+        dispatcher.dispatch(&mut world.res);
+
+        //window.draw(&particle);
+        // Display things on screen
+        wrapper.borrow_mut().display()
     }
 }
