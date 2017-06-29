@@ -69,7 +69,7 @@ fn main() {
     let videoMode = sfml::window::VideoMode::new(800, 600, 32);
     let mut window = RenderWindow::new(videoMode,
                                        "SFML VertexArray accessors Example",
-                                       style::CLOSE,
+                                       style::DEFAULT,
                                        &Default::default());
     window.set_vertical_sync_enabled(true);
 
