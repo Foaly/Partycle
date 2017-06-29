@@ -4,3 +4,7 @@ target/
 
 # PyCharm project files
 .idea
+
+# floobits
+.floo
+.flooignore
