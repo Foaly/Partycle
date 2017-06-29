@@ -53,9 +53,9 @@ fn main() {
             if e == Event::Closed {
                 return;
             }
-            if e == Event::KeyReleased && e. {
-                return;
-            }
+            //if e == Event::KeyReleased {
+            //    return;
+            //}
         }
         // Clear the window
         window.clear(&Color::black());
