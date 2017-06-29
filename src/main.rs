@@ -2,7 +2,7 @@ extern crate sfml;
 extern crate specs;
 
 use sfml::graphics::{Color, PrimitiveType, RenderTarget, RenderWindow, Vertex, Drawable, RenderStates};
-use sfml::window::{Event, style};
+use sfml::window::{Event, style, Key};
 
 
 struct Particle {
@@ -50,12 +50,14 @@ fn main() {
 
     loop {
         for e in window.events() {
-            if e == Event::Closed {
-                return;
+            match e {
+                Event::Closed => return,
+                Event::KeyReleased { code: keycode, .. } => match keycode {
+                    Key::Escape => return,
+                    _ => ()
+                },
+                _ => ()
             }
-            //if e == Event::KeyReleased {
-            //    return;
-            //}
         }
         // Clear the window
         window.clear(&Color::black());
