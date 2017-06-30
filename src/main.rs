@@ -149,7 +149,8 @@ fn main() {
                                        "Partycle",
                                        style::DEFAULT,
                                        &Default::default());
-    window.set_vertical_sync_enabled(true);
+    window.set_framerate_limit(60);
+    window.set_mouse_cursor_visible(false);
     let window_wrapper = Rc::new(RefCell::new(&mut window));
 
     let mut world = World::new();
