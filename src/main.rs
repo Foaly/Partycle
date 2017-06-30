@@ -68,11 +68,9 @@ impl Quad {
     pub fn rand_color(&mut self) {
         let c_rng = Range::new(0u8, std::u8::MAX);
         let mut rng = rand::thread_rng();
-        let (r, g, b) = (c_rng.ind_sample(&mut rng), c_rng.ind_sample(&mut rng), c_rng.ind_sample(&mut rng));
+        let color = Color::rgba(c_rng.ind_sample(&mut rng), c_rng.ind_sample(&mut rng), c_rng.ind_sample(&mut rng), 1u8);
         for i in 0..self.vertices.len() {
-            self.vertices[i].color.r = r;
-            self.vertices[i].color.g = g;
-            self.vertices[i].color.b = b;
+            self.vertices[i].color = color;
         }
     }
 }
@@ -148,7 +146,7 @@ impl<'a, 'b> System<'a> for RenderSystem<'b> {
 fn main() {
     let video_mode = sfml::window::VideoMode::new(WIDTH, HEIGHT, 32);
     let mut window = RenderWindow::new(video_mode,
-                                       "SFML VertexArray accessors Example",
+                                       "Partycle",
                                        style::DEFAULT,
                                        &Default::default());
     window.set_vertical_sync_enabled(true);
