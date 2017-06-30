@@ -6,3 +6,4 @@ authors = ["Maximilian Wagenbach <maximilian.wagenbach@native-instruments.de>"]
 [dependencies]
 sfml = { git = "https://github.com/jeremyletang/rust-sfml" }
 specs = "0.9.1"
+rand = "0.3"
