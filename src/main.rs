@@ -5,7 +5,6 @@ extern crate rand;
 use sfml::graphics::{Color, PrimitiveType, RenderTarget, RenderWindow, Vertex, Drawable,
                      RenderStates, Transform as SfmlTransform};
 use sfml::window::{Event, style, Key};
-use sfml::system::Vector2f;
 
 use specs::{Component, DispatcherBuilder, Join, ReadStorage, System, VecStorage, World,
             WriteStorage};
@@ -69,8 +68,8 @@ impl Quad {
         let c_rng = Range::new(0u8, std::u8::MAX);
         let mut rng = rand::thread_rng();
         let color = Color::rgba(c_rng.ind_sample(&mut rng), c_rng.ind_sample(&mut rng), c_rng.ind_sample(&mut rng), 1u8);
-        for i in 0..self.vertices.len() {
-            self.vertices[i].color = color;
+        for v in &mut self.vertices {
+            v.color = color;
         }
     }
 }
@@ -113,8 +112,8 @@ impl<'a> System<'a> for FadeSystem {
     fn run(&mut self, (mut particles, mut lifetimes): Self::SystemData) {
         for (particle, lifetime) in (&mut particles, &mut lifetimes).join() {
             let alpha = ((1.0 - (lifetime.acc / lifetime.max)) * std::u8::MAX as f32) as u8;
-            for i in 0..particle.vertices.len() {
-                particle.vertices[i].color.a = alpha;
+            for v in &mut particle.vertices {
+                v.color.a = alpha;
             }
 
             lifetime.acc += lifetime.inc;
@@ -122,6 +121,26 @@ impl<'a> System<'a> for FadeSystem {
                 particle.rand_pos();
                 particle.rand_color();
                 lifetime.acc = 0.0;
+            } else {
+                let move_speed = 0.005;
+
+                let x_mul = Range::new(-move_speed, move_speed);
+                let y_mul = Range::new(-move_speed, move_speed);
+                let mut rng = rand::thread_rng();
+                let mut x = particle.vertices[0].position.x;
+                x += (x - (WIDTH/2) as f32) * x_mul.ind_sample(&mut rng);
+                if x < 0.0 { x += WIDTH as f32 } else if x > WIDTH as f32 { x -= WIDTH as f32 }
+
+                let mut y = particle.vertices[0].position.y;
+                y += (y - (HEIGHT/2) as f32) * y_mul.ind_sample(&mut rng);
+                if y < 0.0 { y += HEIGHT as f32 } else if y > HEIGHT as f32 { y -= HEIGHT as f32 }
+
+                particle.vertices[0].position = (x, y).into();
+                particle.vertices[1].position = (x + QUAD, y).into();
+                particle.vertices[2].position = (x, y + QUAD).into();
+                particle.vertices[3].position = (x + QUAD, y).into();
+                particle.vertices[4].position = (x + QUAD, y + QUAD).into();
+                particle.vertices[5].position = (x, y + QUAD).into();
             }
         }
     }
